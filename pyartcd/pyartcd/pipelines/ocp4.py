@@ -1,6 +1,7 @@
 import json
 import os.path
 import shutil
+import time
 import traceback
 
 import click
@@ -62,7 +63,7 @@ class RpmMirror:
 class Ocp4Pipeline:
     def __init__(self, runtime: Runtime, version: str, assembly: str, data_path: str, data_gitref: str,
                  pin_builds: bool, build_rpms: str, rpm_list: str, build_images: str, image_list: str,
-                 skip_plashets: bool, mail_list_failure: str, comment_on_pr: bool, copy_links: bool = False,
+                 skip_plashets: bool, mail_list_failure: str, comment_on_pr: bool, copy_links: bool = True,
                  lock_identifier: str = None):
 
         self.runtime = runtime
@@ -561,6 +562,9 @@ class Ocp4Pipeline:
 
         # Build compose
         try:
+            timeout = 30 # minutes
+            self.runtime.logger.info(f'Waiting until we can be reasonably sure ocp-artifacts copy of brew root is up to date: {timeout} minutes')
+            time.sleep(timeout * 60 * 60)
             plashets_built = await plashets.build_plashets(
                 stream=self.version.stream,
                 release=self.version.release,
