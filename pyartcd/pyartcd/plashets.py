@@ -308,7 +308,7 @@ async def copy_to_remote(local_base_dir: os.PathLike, remote_base_dir: os.PathLi
         cmd.append('--copy-links')
     else:
         cmd.append('--links')
-    cmd.extend(["--progress", "-h", "--no-g", "--omit-dir-times", "--chmod=Dug=rwX,ugo+r",
+    cmd.extend(["--progress", "-h", "--no-g", "--omit-dir-times", "--chmod=Dug=rwX,ugo+r", '--force',
                 "--perms", "--", f"{local_base_dir}/", f"{PLASHET_REMOTE_HOST}:{remote_base_dir}"])
 
     if dry_run:
