@@ -393,6 +393,27 @@ class Repos(object):
                 result[a] = sorted(content_sets)
         return CONTENT_SETS + yaml.dump(result, default_flow_style=False)
 
+    def gen_claircontent(self, enabled_repos=[], non_shipping_repos=[]):
+        """Generate json content for an icm file. OSBS used  to generate this, in
+        Konflux, we create this ourselves."""
+
+        content_set_payload = {}
+        shipping_repos = set(enabled_repos) - set(non_shipping_repos)
+
+        for arch in self._arches:
+            content_set_payload[arch] = {
+                "image_contents": [],
+                "metadata": {
+                    "icm_spec": "https://raw.githubusercontent.com/containerbuildsystem/atomic-reactor/f4abcfdaf8247a6b074f94fa84f3846f82d781c6/atomic_reactor/schemas/content_manifest.json",
+                    "icm_version": 1,
+                    "image_layer_index": 99999
+                },
+                "content_sets": sorted([self._repos[r].content_set(arch) for r in shipping_repos])
+            }
+
+        return content_set_payload
+
+
     def _validate_content_sets(self, arch, names):
         url = "https://rhsm-pulp.corp.redhat.com/pulp/api/v2/repositories/search/"
         payload = {

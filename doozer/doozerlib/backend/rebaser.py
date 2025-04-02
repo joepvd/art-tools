@@ -1085,6 +1085,10 @@ class KonfluxRebaser:
         with dest_dir.joinpath('content_sets.yml').open('w', encoding="utf-8") as rc:
             rc.write(repos.content_sets(enabled_repos=enabled_repos, non_shipping_repos=non_shipping_repos))
 
+        for arch, content in repos.gen_claircontent(enabled_repos=enabled_repos, non_shipping_repos=non_shipping_repos).items():
+            with dest_dir.joinpath(f'.oit/content-sets/{arch}.json').open('w', encoding='utf-8') as clairfile:
+                clairfile.write(content)
+
     def _generate_config_digest(self, metadata: ImageMetadata, dest_dir: Path):
         # The config digest is used by scan-sources to detect config changes
         self._logger.debug("Calculating config digest...")
