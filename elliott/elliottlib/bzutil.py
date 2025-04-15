@@ -487,7 +487,7 @@ class BugTracker:
         return self.config.get('filters', {}).get(filter_name)
 
     def target_release(self) -> List:
-        return self.config.get('target_release')
+        raise NotImplementedError
 
     def search(self, status, search_filter, verbose=False, **kwargs):
         raise NotImplementedError
@@ -695,6 +695,11 @@ class JIRABugTracker(BugTracker):
     @property
     def product(self):
         return self._project
+
+    def target_release(self) -> List:
+        available_versions: set() = {v.name for v in self._client.project(self._project).versions}
+        configured_versions = set(self.config.get('target_release'))
+        return list(available_versions.intersection(configured_versions))
 
     def looks_like_a_jira_project_bug(self, bug_id) -> bool:
         pattern = re.compile(fr'{self._project}-\d+')
@@ -947,6 +952,9 @@ class BugzillaBugTracker(BugTracker):
         if verbose:
             logger.info(query)
         return [BugzillaBug(b) for b in _perform_query(self._client, query)]
+
+    def target_release(self) -> List:
+        return self.config.get('target_release')
 
     def remove_bugs(self, advisory_obj, bugids: List, noop=False):
         if noop:
