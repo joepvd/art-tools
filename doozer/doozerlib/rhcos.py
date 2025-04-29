@@ -10,7 +10,7 @@ import koji
 from tenacity import retry, stop_after_attempt, wait_fixed
 
 from artcommonlib.arch_util import brew_suffix_for_arch, go_arch_for_brew_arch
-from artcommonlib.model import Model
+from artcommonlib.model import Model, Missing
 from artcommonlib.release_util import isolate_el_version_in_release
 from artcommonlib.rhcos import get_build_id_from_rhcos_pullspec
 from doozerlib import brew, util
@@ -185,6 +185,8 @@ class RHCOSBuildFinder:
         :return: Returns (rhcos build id, image pullspec) or (None, None) if not found.
         """
         if self.runtime.group_config.rhcos.get("layered_rhcos", False):
+            if container_conf.primary is Missing or container_conf.primary == False:
+                return None, None
             rhcosdata = util.oc_image_info_for_arch(container_conf.rhcos_index_tag, self.go_arch)
             build_id = rhcosdata['config']['config']['Labels']["org.opencontainers.image.version"]
             pullspec = f"{ART_PROD_IMAGE_REPO}@{rhcosdata['digest']}"
