@@ -283,8 +283,9 @@ class KonfluxRebaser:
             if source and source_dir and not source.is_fork_build:
                 # If the private org branch commit doesn't exist in the public org,
                 # this image contains private fixes
+                # Note: use source.source_path (git repo root), not source_dir (may be a subdirectory)
                 is_commit_in_public_upstream = await util.is_commit_in_public_upstream_async(
-                    source.commit_hash, source.public_upstream_branch, source_dir
+                    source.commit_hash, source.public_upstream_branch, source.source_path
                 )
 
                 if (
